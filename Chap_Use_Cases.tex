@@ -8,3 +8,249 @@ TODO: Summary of what use cases are and who they are for
 
 TODO: note that the interface references here are mainly for conveinence, the
 full declarations are linked
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Hybrid Programming Models}
+\label{chap:hybrid_programming_models}
+
+
+%%%%%%%%%%%
+\subsection{Brief Description}
+Hybrid applications (i.e., applications that utilize more than one lprogramming model, such as an MPI application that also uses OpenMP or PGAS) are growing in popularity, especially as chips with increasingly large numbers of cores and processors proliferate. Unfortunately, the various models currently operate under the assumption that they alone control execution. This leads to conflicts in hybrid applications. Deadlock of parallel applications can occur when one model prevents the other from making progress due to lack of coordination between the multiple programming models~\cite{2016:Hamidouche}.  Sub-optimal performance can also occur due to uncoordinated division of hardware resources between the programming models~\cite{2018:Vallee,ompix-moc}. This use-case offers potential solutions to the problem by providing a pathway for programming models to coordinate their actions.
+
+\subsection{Use Case Details}
+
+\subsubsection{Identifying Active Programming Models}
+
+The current state-of-the-practice for programming models to detect one another is via set environment variables.  For example, OpenMP looks for environment variables to indicate that MPI is active.  Unfortunately, this technique is not completely reliable as environment variables change over time and with new software versions.  Also, the fact that an environment variable is present doesn't guarantee that a particular programming is in active use since Resource Managers routinely set environment variables "just in case" the application needs them. PMIx provides a reliable mechanism by which each library can determine that another library is in operation.
+
+When initializing PMIx, programming models can register themselves, including their name, version, and threading model.  This information is then cached locally and can then be read asynchronously by other programming models using PMIx's Event Notification system (see next section for more details).
+
+This initialization mechanism also allows libraries to share knowledge of each other's resources and intended resource utilization. For example, if OpenMP knows which hardware threads that MPI is using it could potentially avoid processor and cache contention.
+
+\relatedapis
+
+{\large \refapi{PMIx_Init}}
+\pasteSignature{PMIx_Init}
+
+\pasteAttributeItem{PMIX_PROGRAMMING_MODEL}
+\pasteAttributeItem{PMIX_MODEL_LIBRARY_NAME}
+\pasteAttributeItem{PMIX_MODEL_LIBRARY_VERSION}
+\pasteAttributeItem{PMIX_THREADING_MODEL}
+\pasteAttributeItem{PMIX_MODEL_NUM_THREADS}
+\pasteAttributeItem{PMIX_MODEL_NUM_CPUS}
+\pasteAttributeItem{PMIX_MODEL_CPU_TYPE}
+\pasteAttributeItem{PMIX_MODEL_PHASE_NAME}
+\pasteAttributeItem{PMIX_MODEL_PHASE_TYPE}
+\pasteAttributeItem{PMIX_MODEL_AFFINITY_POLICY}
+
+\example
+
+\cspecificstart
+\begin{codepar}
+pmix_proc_t myproc;
+pmix_info_t *info;
+
+PMIX_INFO_CREATE(info, 4);
+PMIX_INFO_LOAD(&info[0], PMIX_PROGRAMMING_MODEL,
+               "MPI", PMIX_STRING);
+PMIX_INFO_LOAD(&info[1], PMIX_MODEL_LIBRARY_NAME,
+               "FooMPI", PMIX_STRING);
+PMIX_INFO_LOAD(&info[2], PMIX_MODEL_LIBRARY_VERSION,
+               "1.0.0", PMIX_STRING);
+PMIX_INFO_LOAD(&info[3], PMIX_THREADING_MODEL,
+               "pthread", PMIX_STRING);
+pmix_status_t rc = PMIx_Init(&myproc, info, 4);
+PMIX_INFO_FREE(info, 4);
+\end{codepar}
+\cspecificend
+
+\subsubsection{Coordinating at Runtime}
+
+The PMIx Event Notification system provides a mechanism by which the resource manager can communicate system events to applications, thus providing applications with an opportunity to generate an appropriate response. Hybrid applications can leverage these events for cross-library coordination.
+
+Programming models can access the information provided by other programming models during their initialization using the event notification system.  In this case, programming models should register a callback for the \refconst{PMIX_MODEL_DECLARED} event.
+
+Programming models can also use the PMIx event notification system to communicate dynamic information, such as entering a new application phase (\refconst{PMIX_MODEL_PHASE_NAME}) or a change in resources used (\refconst{PMIX_MODEL_RESOURCES}).  This dynamic information can be broadcast to other programming models using the \refapi{PMIx_Notify_event} function.  Other programming models can register callback functions to run when these events occur (i.e., callback functions) using \refapi{PMIx_Register_event_handler}.
+
+\relatedapis
+
+{\large \refapi{PMIx_Notify_event}}
+\pasteSignature{PMIx_Notify_event}
+
+\refconst{PMIX_MODEL_DECLARED} \\
+\refconst{PMIX_MODEL_RESOURCES} \\
+\refconst{PMIX_OPENMP_PARALLEL_ENTERED} \\
+\refconst{PMIX_OPENMP_PARALLEL_EXITED} \\
+
+{\large \refapi{PMIx_Register_event_handler}}
+\pasteSignature{PMIx_Register_event_handler}
+
+\pastePRIAttributeItem{PMIX_RANGE}
+
+{\large \refapi{pmix_event_notification_cbfunc_fn_t}}
+\pasteSignature{pmix_event_notification_cbfunc_fn_t}
+
+\pasteAttributeItem{PMIX_EVENT_NO_TERMINATION}
+\pasteAttributeItem{PMIX_EVENT_WANT_TERMINATION}
+\refconst{PMIX_EVENT_ACTION_COMPLETE}
+
+
+\example
+
+Registering a callback to run when another programming model initializes:
+\cspecificstart
+\begin{codepar}
+static void
+model_declared_cb(size_t evhdlr_registration_id, pmix_status_t status,
+                  const pmix_proc_t *source, pmix_info_t info[],
+                  size_t ninfo, pmix_info_t results[], size_t nresults,
+                  pmix_event_notification_cbfunc_fn_t cbfunc,
+                  void *cbdata)
+\{
+    for (n = 0; n < ninfo; n++)  \{
+        if  (PMIX_CHECK_KEY(info[n], PMIX_PROGRAMMING_MODEL) &&
+             strcmp(info[n].value.data.string, "MPI") == 0) \{
+            /* ignore our own declaration */
+            break;
+        \} else \{
+            /* actions to perform when another model registers */
+        \}
+    \}
+    if (NULL != cbfunc) \{
+        /* tell the event handler that we are only a partial step */
+        cbfunc(PMIX_EVENT_PARTIAL_ACTION_TAKEN, NULL, 0, NULL, NULL,
+               cbdata);
+    \}
+\}
+
+pmix_status_t code = PMIX_MODEL_DECLARED;
+rc = PMIx_Register_event_handler(&code, 1, NULL, 0, model_declared_cb,
+                                 NULL, NULL);
+\end{codepar}
+\cspecificend
+
+Notifying an event:
+\cspecificstart
+\begin{codepar}
+// TODO: flesh out the last few arguments to INFO_LOAD and Notify_event
+PMIX_INFO_CREATE(info, 2);
+PMIX_INFO_LOAD(&info[0], PMIX_EVENT_NON_DEFAULT, false, PMIX_BOOL);
+PMIX_INFO_LOAD(&info[1], PMIX_EVENT_CUSTOM_RANGE, TODO, TODO);
+PMIx_Notify_event(PMIX_OPENMP_PARALLEL_ENTERED, TODO, TODO, NULL, 0,
+                  NULL, NULL);
+PMIX_INFO_FREE(info, 2);
+\end{codepar}
+\cspecificend
+
+
+\subsubsection{Coordinating at Runtime with Multiple Event Handlers}
+
+Coordinating with a threading library such as OpenMP creates the need for separate event handlers for threads of the same process.  For example in an MPI+OpenMP hybrid application, the MPI thread and the main OpenMP thread may both want to be notified anytime an OpenMP worker thread enters a parallel region.  This requiring support for multiple threads to potentially register different event handlers against the same status code.
+
+Multiple event handlers registered against the same event are processed in a chain-like manner based on the order in which they were registered, as modified by directive. Registrations against specific event codes are processed first, followed by registrations against multiple event codes and then any default registrations. At each point in the chain, an event handler is called by the PMIx progress thread and given a function to call when that handler has completed its operation. The handler callback notifies PMIx that the handler is done, returning a status code to indicate the result of its work. The results are appended to the array of prior results, with the returned values combined into an array within a single pmix_info_t as follows:
+\begin{itemize}
+\item \texttt{array[0]}: the event handler name provided at registration (may be an empty field if a string name was not given) will be in the key, with the pmix_status_t value returned by the handler
+\item \texttt{array[*]}: the array of results returned by the handler, if any.
+\end{itemize}
+
+The current PMIx standard does not actually specify a default ordering for event handlers as they are being registered. However, it does include an inherent ordering for invocation. Specifically, PMIx stipulates that handlers be called in the following categorical order:
+
+\begin{itemize}
+\item single status event handlers - i.e., handlers that were registered against a single specific status.
+\item multi status event handlers - those registered against more than one specific status
+\item default event handlers - those registered against no specific status
+\end{itemize}
+
+\relatedapis
+
+{\large \refapi{PMIx_Register_event_handler}}
+\pasteSignature{PMIx_Register_event_handler}
+
+\pasteAttributeItem{PMIX_EVENT_HDLR_NAME}
+\pasteAttributeItem{PMIX_EVENT_HDLR_FIRST}
+\pasteAttributeItem{PMIX_EVENT_HDLR_LAST}
+\pasteAttributeItem{PMIX_EVENT_HDLR_FIRST_IN_CATEGORY}
+\pasteAttributeItem{PMIX_EVENT_HDLR_LAST_IN_CATEGORY}
+\pasteAttributeItem{PMIX_EVENT_HDLR_BEFORE}
+\pasteAttributeItem{PMIX_EVENT_HDLR_AFTER}
+\pasteAttributeItem{PMIX_EVENT_HDLR_APPEND}
+
+{\large \refapi{pmix_event_notification_cbfunc_fn_t}}
+\pasteSignature{pmix_event_notification_cbfunc_fn_t}
+
+\refconst{PMIX_EVENT_NO_ACTION_TAKEN} \\
+\refconst{PMIX_EVENT_PARTIAL_ACTION_TAKEN} \\
+\refconst{PMIX_EVENT_ACTION_DEFERRED} \\
+
+\example
+
+From the OpenMP master thread:
+
+\cspecificstart
+\begin{codepar}
+static void
+parallel_region_entered_cb(size_t evhdlr_registration_id,
+                           pmix_status_t status,
+                           const pmix_proc_t *source,
+                           pmix_info_t info[], size_t ninfo,
+                           pmix_info_t results[], size_t nresults,
+                           pmix_event_notification_cbfunc_fn_t cbfunc,
+                           void *cbdata)
+\{
+    /* do what we need MPI to do on entering a parallel region */
+    if (NULL != cbfunc) \{
+        /* tell the event handler that we are only a partial step */
+        cbfunc(PMIX_EVENT_PARTIAL_ACTION_TAKEN, NULL, 0, NULL, NULL,
+               cbdata);
+    \}
+\}
+pmix_status_t code = PMIX_OPENMP_PARALLEL_ENTERED;
+PMIX_INFO_CREATE(info, 2);
+PMIX_INFO_LOAD(&info[0], PMIX_EVENT_HDLR_NAME,
+               "OpenMP-Master", PMIX_STRING);
+PMIX_INFO_LOAD(&info[1], PMIX_EVENT_HDLR_FIRST,
+               true, PMIX_BOOL);
+rc = PMIx_Register_event_handler(&code, 1, info, 1,
+                                 parallel_region_entered_cb,
+                                 NULL, NULL);
+PMIX_INFO_FREE(info, 2);
+\end{codepar}
+\cspecificend
+
+
+From the MPI thread:
+
+\cspecificstart
+\begin{codepar}
+static void
+parallel_region_entered_cb(size_t evhdlr_registration_id,
+                           pmix_status_t status,
+                           const pmix_proc_t *source,
+                           pmix_info_t info[], size_t ninfo,
+                           pmix_info_t results[], size_t nresults,
+                           pmix_event_notification_cbfunc_fn_t cbfunc,
+                           void *cbdata)
+\{
+    /* do what we need MPI to do on entering a parallel region */
+    if (NULL != cbfunc) \{
+        /* tell the event handler that we are the last step */
+        cbfunc(PMIX_EVENT_ACTION_COMPLETE, NULL, 0, NULL, NULL,
+               cbdata);
+    \}
+\}
+pmix_status_t code = PMIX_OPENMP_PARALLEL_ENTERED;
+PMIX_INFO_CREATE(info, 2);
+PMIX_INFO_LOAD(&info[0], PMIX_EVENT_HDLR_NAME,
+               "MPI-Thread", PMIX_STRING);
+PMIX_INFO_LOAD(&info[1], PMIX_EVENT_HDLR_AFTER,
+               "OpenMP-Master", PMIX_STRING);
+rc = PMIx_Register_event_handler(&code, 1, info, 1,
+                                 parallel_region_entered_cb,
+                                 NULL, NULL);
+PMIX_INFO_FREE(info, 2);
+\end{codepar}
+\cspecificend
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
