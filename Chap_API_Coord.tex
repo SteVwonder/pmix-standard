@@ -19,18 +19,15 @@ Several datatype definitions have been created to support network coordinates.
 
 The \refstruct{pmix_coord_t} structure describes the network coordinates of a specified process in a given view
 
-\versionMarker{4.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{4.0}
 typedef struct pmix_coord \{
-    char *fabric;
-    char *plane;
-    pmix_coord_view_t view;
-    uint32_t *coord;
-    size_t dims;
+\hspace*{4\sigspace}char *fabric;
+\hspace*{4\sigspace}char *plane;
+\hspace*{4\sigspace}pmix_coord_view_t view;
+\hspace*{4\sigspace}uint32_t *coord;
+\hspace*{4\sigspace}size_t dims;
 \} pmix_coord_t;
-\end{codepar}
-\cspecificend
+\end{signature}
 
 All coordinate values shall be expressed as unsigned integers due to their units being defined in network devices and not physical distances. The coordinate is therefore an indicator of connectivity and not relative communication distance.
 
@@ -55,12 +52,9 @@ The following macros are provided to support the \refstruct{pmix_coord_t} struct
 
 Initialize the \refstruct{pmix_coord_t} fields
 
-\versionMarker{4.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{4.0}
 PMIX_COORD_CONSTRUCT(m)
-\end{codepar}
-\cspecificend
+\end{signature}
 
 \begin{arglist}
 \argin{m}{Pointer to the structure to be initialized (pointer to \refstruct{pmix_coord_t})}
@@ -72,12 +66,9 @@ PMIX_COORD_CONSTRUCT(m)
 
 Destruct the \refstruct{pmix_coord_t} fields
 
-\versionMarker{4.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{4.0}
 PMIX_COORD_DESTRUCT(m)
-\end{codepar}
-\cspecificend
+\end{signature}
 
 \begin{arglist}
 \argin{m}{Pointer to the structure to be destructed (pointer to \refstruct{pmix_coord_t})}
@@ -89,12 +80,9 @@ PMIX_COORD_DESTRUCT(m)
 
 Allocate and initialize a \refstruct{pmix_coord_t} array
 
-\versionMarker{4.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{4.0}
 PMIX_COORD_CREATE(m, n)
-\end{codepar}
-\cspecificend
+\end{signature}
 
 \begin{arglist}
 \arginout{m}{Address where the pointer to the array of \refstruct{pmix_coord_t} structures shall be stored (handle)}
@@ -107,12 +95,9 @@ PMIX_COORD_CREATE(m, n)
 
 Release an array of \refstruct{pmix_coord_t} structures
 
-\versionMarker{4.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{4.0}
 PMIX_COORD_FREE(m, n)
-\end{codepar}
-\cspecificend
+\end{signature}
 
 \begin{arglist}
 \argin{m}{Pointer to the array of \refstruct{pmix_coord_t} structures (handle)}
@@ -124,15 +109,12 @@ PMIX_COORD_FREE(m, n)
 \subsection{Network Coordinate Views}
 \declarestruct{pmix_coord_view_t}
 
-\versionMarker{4.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{4.0}
 typedef uint8_t pmix_coord_view_t;
 #define PMIX_COORD_VIEW_UNDEF       0x00
 #define PMIX_COORD_LOGICAL_VIEW     0x01
 #define PMIX_COORD_PHYSICAL_VIEW    0x02
-\end{codepar}
-\cspecificend
+\end{signature}
 
 Network coordinates can be reported based on different \emph{views} according to user preference at the time of request. The following views have been defined:
 

@@ -36,14 +36,11 @@ Request a credential from the \ac{PMIx} server library or the host environment
 %%%%
 \format
 
-\versionMarker{3.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{3.0}
 pmix_status_t
 PMIx_Get_credential(const pmix_info_t info[], size_t ninfo,
-                    pmix_byte_object_t *credential)
-\end{codepar}
-\cspecificend
+\hspace*{20\sigspace}pmix_byte_object_t *credential)
+\end{signature}
 
 \begin{arglist}
 \argin{info}{Array of \refstruct{pmix_info_t} structures (array of handles)}
@@ -100,14 +97,11 @@ Request a credential from the \ac{PMIx} server library or the host environment
 %%%%
 \format
 
-\versionMarker{3.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{3.0}
 pmix_status_t
 PMIx_Get_credential_nb(const pmix_info_t info[], size_t ninfo,
-                       pmix_credential_cbfunc_t cbfunc, void *cbdata)
-\end{codepar}
-\cspecificend
+\hspace*{23\sigspace}pmix_credential_cbfunc_t cbfunc, void *cbdata)
+\end{signature}
 
 \begin{arglist}
 \argin{info}{Array of \refstruct{pmix_info_t} structures (array of handles)}
@@ -172,15 +166,12 @@ Request validation of a credential by the \ac{PMIx} server library or the host e
 %%%%
 \format
 
-\versionMarker{3.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{3.0}
 pmix_status_t
 PMIx_Validate_credential(const pmix_byte_object_t *cred,
-                         const pmix_info_t info[], size_t ninfo,
-                         pmix_info_t **results, size_t *nresults)
-\end{codepar}
-\cspecificend
+\hspace*{25\sigspace}const pmix_info_t info[], size_t ninfo,
+\hspace*{25\sigspace}pmix_info_t **results, size_t *nresults)
+\end{signature}
 
 \begin{arglist}
 \argin{cred}{Pointer to \refstruct{pmix_byte_object_t} containing the credential (handle)}
@@ -241,16 +232,13 @@ Request validation of a credential by the \ac{PMIx} server library or the host e
 %%%%
 \format
 
-\versionMarker{3.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{3.0}
 pmix_status_t
 PMIx_Validate_credential_nb(const pmix_byte_object_t *cred,
-                            const pmix_info_t info[], size_t ninfo,
-                            pmix_validation_cbfunc_t cbfunc,
-                            void *cbdata)
-\end{codepar}
-\cspecificend
+\hspace*{28\sigspace}const pmix_info_t info[], size_t ninfo,
+\hspace*{28\sigspace}pmix_validation_cbfunc_t cbfunc,
+\hspace*{28\sigspace}void *cbdata)
+\end{signature}
 
 \begin{arglist}
 \argin{cred}{Pointer to \refstruct{pmix_byte_object_t} containing the credential (handle)}

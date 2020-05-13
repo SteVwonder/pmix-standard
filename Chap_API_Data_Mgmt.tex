@@ -12,30 +12,27 @@
 
 The \refstruct{pmix_data_buffer_t} structure describes a data buffer used for packing and unpacking.
 
-\versionMarker{2.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{2.0}
 typedef struct pmix_data_buffer \{
-    /** Start of my memory */
-    char *base_ptr;
-    /** Where the next data will be packed to
-        (within the allocated memory starting
-        at base_ptr) */
-    char *pack_ptr;
-    /** Where the next data will be unpacked
-        from (within the allocated memory
-        starting as base_ptr) */
-    char *unpack_ptr;
-    /** Number of bytes allocated (starting
-        at base_ptr) */
-    size_t bytes_allocated;
-    /** Number of bytes used by the buffer
-        (i.e., amount of data -- including
-        overhead -- packed in the buffer) */
-    size_t bytes_used;
+\hspace*{4\sigspace}/** Start of my memory */
+\hspace*{4\sigspace}char *base_ptr;
+\hspace*{4\sigspace}/** Where the next data will be packed to
+\hspace*{8\sigspace}(within the allocated memory starting
+\hspace*{8\sigspace}at base_ptr) */
+\hspace*{4\sigspace}char *pack_ptr;
+\hspace*{4\sigspace}/** Where the next data will be unpacked
+\hspace*{8\sigspace}from (within the allocated memory
+\hspace*{8\sigspace}starting as base_ptr) */
+\hspace*{4\sigspace}char *unpack_ptr;
+\hspace*{4\sigspace}/** Number of bytes allocated (starting
+\hspace*{8\sigspace}at base_ptr) */
+\hspace*{4\sigspace}size_t bytes_allocated;
+\hspace*{4\sigspace}/** Number of bytes used by the buffer
+\hspace*{8\sigspace}(i.e., amount of data -- including
+\hspace*{8\sigspace}overhead -- packed in the buffer) */
+\hspace*{4\sigspace}size_t bytes_used;
 \} pmix_data_buffer_t;
-\end{codepar}
-\cspecificend
+\end{signature}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -57,12 +54,9 @@ Allocate memory for a \refstruct{pmix_data_buffer_t} object and initialize it
 %%%%
 \format
 
-\versionMarker{2.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{2.0}
 PMIX_DATA_BUFFER_CREATE(buffer);
-\end{codepar}
-\cspecificend
+\end{signature}
 
 \begin{arglist}
 \argout{buffer}{Variable to be assigned the pointer to the allocated \refstruct{pmix_data_buffer_t} (handle)}
@@ -86,12 +80,9 @@ Free a \refstruct{pmix_data_buffer_t} object and the data it contains
 %%%%
 \format
 
-\versionMarker{2.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{2.0}
 PMIX_DATA_BUFFER_RELEASE(buffer);
-\end{codepar}
-\cspecificend
+\end{signature}
 
 \begin{arglist}
 \argin{buffer}{Pointer to the \refstruct{pmix_data_buffer_t} to be released (handle)}
@@ -115,12 +106,9 @@ Initialize a statically declared \refstruct{pmix_data_buffer_t} object
 %%%%
 \format
 
-\versionMarker{2.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{2.0}
 PMIX_DATA_BUFFER_CONSTRUCT(buffer);
-\end{codepar}
-\cspecificend
+\end{signature}
 
 \begin{arglist}
 \argin{buffer}{Pointer to the allocated \refstruct{pmix_data_buffer_t} that is to be initialized (handle)}
@@ -144,12 +132,9 @@ Release the data contained in a \refstruct{pmix_data_buffer_t} object
 %%%%
 \format
 
-\versionMarker{2.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{2.0}
 PMIX_DATA_BUFFER_DESTRUCT(buffer);
-\end{codepar}
-\cspecificend
+\end{signature}
 
 \begin{arglist}
 \argin{buffer}{Pointer to the \refstruct{pmix_data_buffer_t} whose data is to be released (handle)}
@@ -173,12 +158,9 @@ Load a blob into a \refstruct{pmix_data_buffer_t} object
 %%%%
 \format
 
-\versionMarker{2.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{2.0}
 PMIX_DATA_BUFFER_LOAD(buffer, data, size);
-\end{codepar}
-\cspecificend
+\end{signature}
 
 \begin{arglist}
 \argin{buffer}{Pointer to a pre-allocated \refstruct{pmix_data_buffer_t} (handle)}
@@ -204,12 +186,9 @@ Unload the data from a \refstruct{pmix_data_buffer_t} object
 %%%%
 \format
 
-\versionMarker{2.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{2.0}
 PMIX_DATA_BUFFER_UNLOAD(buffer, data, size);
-\end{codepar}
-\cspecificend
+\end{signature}
 
 \begin{arglist}
 \argin{buffer}{Pointer to the \refstruct{pmix_data_buffer_t} whose data is to be extracted (handle)}
@@ -242,16 +221,13 @@ Pack one or more values of a specified type into a buffer, usually for transmiss
 %%%%
 \format
 
-\versionMarker{2.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{2.0}
 pmix_status_t
 PMIx_Data_pack(const pmix_proc_t *target,
-               pmix_data_buffer_t *buffer,
-               void *src, int32_t num_vals,
-               pmix_data_type_t type);
-\end{codepar}
-\cspecificend
+\hspace*{15\sigspace}pmix_data_buffer_t *buffer,
+\hspace*{15\sigspace}void *src, int32_t num_vals,
+\hspace*{15\sigspace}pmix_data_type_t type);
+\end{signature}
 
 \begin{arglist}
 \argin{target}{Pointer to a \refstruct{pmix_proc_t} containing the nspace/rank of the process that will be unpacking the final buffer. A NULL value may be used to indicate that the target is based on the same \ac{PMIx} version as the caller. Note that only the target's nspace is relevant. (handle)}
@@ -309,17 +285,14 @@ Unpack values from a \refstruct{pmix_data_buffer_t}
 %%%%
 \format
 
-\versionMarker{2.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{2.0}
 pmix_status_t
 PMIx_Data_unpack(const pmix_proc_t *source,
-                 pmix_data_buffer_t *buffer, void *dest,
-                 int32_t *max_num_values,
-                 pmix_data_type_t type);
+\hspace*{17\sigspace}pmix_data_buffer_t *buffer, void *dest,
+\hspace*{17\sigspace}int32_t *max_num_values,
+\hspace*{17\sigspace}pmix_data_type_t type);
 
-\end{codepar}
-\cspecificend
+\end{signature}
 
 
 \begin{arglist}
@@ -374,14 +347,11 @@ Copy a data value from one location to another.
 %%%%
 \format
 
-\versionMarker{2.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{2.0}
 pmix_status_t
 PMIx_Data_copy(void **dest, void *src,
-               pmix_data_type_t type);
-\end{codepar}
-\cspecificend
+\hspace*{15\sigspace}pmix_data_type_t type);
+\end{signature}
 
 \begin{arglist}
 \argin{dest}{The address of a pointer into which the address of the resulting data is to be stored. (\code{void**})}
@@ -417,14 +387,11 @@ Pretty-print a data value.
 %%%%
 \format
 
-\versionMarker{2.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{2.0}
 pmix_status_t
 PMIx_Data_print(char **output, char *prefix,
-                void *src, pmix_data_type_t type);
-\end{codepar}
-\cspecificend
+\hspace*{16\sigspace}void *src, pmix_data_type_t type);
+\end{signature}
 
 \begin{arglist}
 \argin{output}{The address of a pointer into which the address of the resulting output is to be stored. (\code{char**})}
@@ -458,14 +425,11 @@ Copy a payload from one buffer to another
 %%%%
 \format
 
-\versionMarker{2.0}
-\cspecificstart
-\begin{codepar}
+\begin{signature}{2.0}
 pmix_status_t
 PMIx_Data_copy_payload(pmix_data_buffer_t *dest,
-                       pmix_data_buffer_t *src);
-\end{codepar}
-\cspecificend
+\hspace*{23\sigspace}pmix_data_buffer_t *src);
+\end{signature}
 
 \begin{arglist}
 \argin{dest}{Pointer to the destination \refstruct{pmix_data_buffer_t} (handle)}
