@@ -304,6 +304,8 @@
 \newcommand{\priattr} {\littleheader{PRI Attributes}}
 \newcommand{\reqattr} {\littleheader{\ac{RM} Required Attributes}}
 \newcommand{\optattr} {\littleheader{\ac{RM} Optional Attributes}}
+\newcommand{\relatedapis} {\littleheader{Related Interfaces, Attributes, and Status Codes}}
+\newcommand{\example} {\littleheader{Code Example}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Clipboard
@@ -424,6 +426,30 @@
     \pastePRRTEAttributeItemBegin{#1}
     \pastePRRTEAttributeItemEnd{}
 }
+
+\newenvironment{signature}[1]{
+\versionMarker{#1}
+\cspecificstart
+\begin{codepar}
+}{
+\end{codepar}
+\cspecificend
+}
+
+\newcommand{\copySignature}[3]{
+  \StdCopyEcho{sig:#1}{
+    \begin{signature}{#2}
+      #3
+    \end{signature}
+  }
+}
+
+\newcommand{\pasteSignature}[1]{
+  \StdPaste{sig:#1}
+}
+
+\newlength{\sigspace}
+\setlength{\sigspace}{0.083in} % width of the bolded, monospace characters used in codepar env
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Code and placeholder semantic tagging.
