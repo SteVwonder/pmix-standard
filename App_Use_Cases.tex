@@ -4,7 +4,7 @@
 \chapter{Use-Cases}
 \label{app:use-cases}
 
-The \ac{PMIx} standard provides many generic interfaces that can be composed into higher-level use cases in a variety of ways.  While the specific interfaces and attributes are standardized, the use cases themselves are not (and should not) be standardized.  Common use cases are included here as examples of how PMIx's generic interfaces \texttt{might} be composed together for a higher-level purpose. The use cases are intended for both \ac{PMIx} interface users and library implementors.  Wherby a better understanding of the general usage model within the community can help users picking up PMIx for the first and help implementors optimize their implementation for the common cases.
+The \ac{PMIx} standard provides many generic interfaces that can be composed into higher-level use cases in a variety of ways.  While the specific interfaces and attributes are standardized, the use cases themselves are not (and should not) be standardized.  Common use cases are included here as examples of how PMIx's generic interfaces \textit{might} be composed together for a higher-level purpose. The use cases are intended for both \ac{PMIx} interface users and library implementors.  Whereby a better understanding of the general usage model within the community can help users picking up PMIx for the first and help implementors optimize their implementation for the common cases.
 
 Each use case is structured to provide background information about the high-level use case as well as specific details about how the PMIx interfaces are used within the use case.  Some use cases even provide code snippets.  These code snippets are apart of larger code examples located within the standard's source code repository, and each complete code example is fully compilable and runnable. The related interfaces and attributes collected at the bottom of each use case are mainly for conveinence and link to the full standardized definitions.
 
@@ -28,7 +28,7 @@ Some business card information is meant for remote processes (e.g., TCP or Infin
 
 The \refapi{PMIx_Put} operations may be cached local to the process. Once all \refapi{PMIx_Put} operations have been called each process should call \refapi{PMIx_Commit} to push those values to the local PMIx server. Note that in a multi-library configuration each library may \refapi{PMIx_Put} then \refapi{PMIx_Commit} values - so there may be multiple \refapi{PMIx_Commit} calls before a Business Card Exchange is activated.
 
-After calling \refapi{PMIx_Commit} a process can activate the Business Card Exchange collective operation by calling \refapi{PMIx_Fence}. The \refapi{PMIx_Fence} operation is collective over the set of processes specified in the argument set. That allows for the collective to span a subset of a namespace or multiple namespaces. After the completion of the \refapi{PMIx_Fence} operation, the data \refapi{PMIx_Put} by other processes is available to the local process through a call to \refapi{PMIx_Get} which returns the key/value pairs necessary to establish the connection(s) with the other processes.
+After calling \refapi{PMIx_Commit} a process can activate the Business Card Exchange collective operation by calling \refapi{PMIx_Fence}. The \refapi{PMIx_Fence} operation is collective over the set of processes specified in the argument set. That allows for the collective to span a subset of a namespace or multiple namespaces. After the completion of the \refapi{PMIx_Fence} operation, the data stored by other processes via \refapi{PMIx_Put} is available to the local process through a call to \refapi{PMIx_Get} which returns the key/value pairs necessary to establish the connection(s) with the other processes.
 
 The \refapi{PMIx_Fence} operation must have a "Synchronize Only" mode that works as a barrier operation. This is helpful if the communication library requires a synchronization before leaving initialization or starting finalization, for example.
 
@@ -94,11 +94,11 @@ This use case distills out the features/extensions requested in the RFCs that ar
 
 \subsubsection{Tools vs Debuggers}
 
-A \texttt{tool} is a process designed to monitor, record, analyze, or control the execution of another process.  Typically used for the purposes of profiling and debugging. A \texttt{first-party tool} runs within the address space of the application process while a \texttt{third-party tool} run within its own process.  A \texttt{debugger} is a third-party tool that inspects and controls an application process's execution using system-level debug APIs (e.g., \code{ptrace}).
+A \textit{tool} is a process designed to monitor, record, analyze, or control the execution of another process.  Typically used for the purposes of profiling and debugging. A \textit{first-party tool} runs within the address space of the application process while a \textit{third-party tool} run within its own process.  A \textit{debugger} is a third-party tool that inspects and controls an application process's execution using system-level debug APIs (e.g., \code{ptrace}).
 
 \subsubsection{Parallel Launching Methods}
-A \texttt{starter} program is a program responsible for launching a parallel runtime, such as \ac{MPI}.  \ac{PMIx} supports two primary methods for launching parallel applications under tools and debuggers: indirect and direct. In the indirect launching method, the tool is attached to the starter.  In the direct launching method, the tool takes the place of the starter.  
-\ac{PMIx} also supports attaching to already running programs via the \texttt{Process Acquisition} interfaces.
+A \textit{starter} program is a program responsible for launching a parallel runtime, such as \ac{MPI}.  \ac{PMIx} supports two primary methods for launching parallel applications under tools and debuggers: indirect and direct. In the indirect launching method, the tool is attached to the starter.  In the direct launching method, the tool takes the place of the starter.  
+\ac{PMIx} also supports attaching to already running programs via the \textit{Process Acquisition} interfaces.
 
 \subsubsection{Process Synchronization}
 Process Synchronization is the technique tools use to start the processes of a parallel application such that the tools can still attach to the process early in it's lifetime.  Said another away, the tool must be able to start the application processes without them ``running away'' from the tool.  In the case of \ac{MPI}, this means stopping the applications processes before they return from \code{MPI_Init}.
