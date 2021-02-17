@@ -101,7 +101,7 @@ A \textit{starter} program is a program responsible for launching a parallel run
 \ac{PMIx} also supports attaching to already running programs via the \textit{Process Acquisition} interfaces.
 
 \subsubsection{Process Synchronization}
-Process Synchronization is a technique tools use to start the processes of a parallel application such that the tools can still attach to the process early in it's lifetime.  Said another away, the tool must be able to start the application processes without them ``running away'' from the tool.  In the case of \ac{MPI}, this means stopping the applications processes before they return from \code{MPI_Init}.
+Process Synchronization is a technique tools use to start the processes of a parallel application such that the tools can still attach to the process early in it's lifetime.  Said another away, the tool must be able to start the application processes without them ``running away'' from the tool.  In the case of \ac{MPI} (Version 3.1 or the MPI World Process in future versions), this means stopping the applications processes before they return from \code{MPI_Init} or \code{MPI_Init_thread}.
 
 \subsubsection{Process Acquisition}\label{subsubsec:process-acq}
 
@@ -324,17 +324,18 @@ Resource managers and launchers must scan for relevant directives, modifying env
 
 \subsection{Use Case Summary}
 
-Hybrid applications (i.e., applications that utilize more than one lprogramming model, such as an MPI application that also uses OpenMP or PGAS) are growing in popularity, especially as chips with increasingly large numbers of cores and processors proliferate. Unfortunately, the various models currently operate under the assumption that they alone control execution. This leads to conflicts in hybrid applications. Deadlock of parallel applications can occur when one model prevents the other from making progress due to lack of coordination between the multiple programming models~\cite{2016:Hamidouche}.  Sub-optimal performance can also occur due to uncoordinated division of hardware resources between the programming models~\cite{2018:Vallee,ompix-moc}. This use-case offers potential solutions to the problem by providing a pathway for programming models to coordinate their actions.
+Hybrid applications (i.e., applications that utilize more than one programming model or system, such as an MPI application that also uses OpenMP or UPS) are growing in popularity, especially as processors with increasingly large numbers of cores and/or hardware threads proliferate. Unfortunately, the various corresponding runtime systems currently operate under the assumption that they alone control execution. This leads to conflicts in hybrid applications. Deadlock of parallel applications can occur when one runtime system prevents the other from making progress due to lack of coordination between them~\cite{2016:Hamidouche}.  Sub-optimal performance can also occur due to uncoordinated division of hardware resources between the runtime systems implementing the different programming models or systems~\cite{2018:Vallee,ompix-moc}. This use-case offers potential solutions to this
+problem by providing a pathway for parallel runtime systems to coordinate their actions.
 
 \subsection{Use Case Details}
 
 \subsubsection{Identifying Active Programming Models}
 
-The current state-of-the-practice for programming models to detect one another is via set environment variables.  For example, OpenMP looks for environment variables to indicate that MPI is active.  Unfortunately, this technique is not completely reliable as environment variables change over time and with new software versions.  Also, the fact that an environment variable is present doesn't guarantee that a particular programming is in active use since Resource Managers routinely set environment variables "just in case" the application needs them. PMIx provides a reliable mechanism by which each library can determine that another library is in operation.
+The current state-of-the-practice for concurrently used runtime systems in a single application to detect one another is via set environment variables.  For example, some OpenMP implementations look for environment variables to indicate that an MPI library is active.  Unfortunately, this technique is not completely reliable as environment variables change over time and with new software versions, and this detection is implementation specific.  Also, the fact that an environment variable is present doesn't guarantee that a particular runtime system is in active use since Resource Managers routinely set environment variables "just in case" the application needs them. PMIx provides a reliable mechanism by which each library can determine that another runtime library is in operation.
 
-When initializing PMIx, programming models can register themselves, including their name, version, and threading model.  This information is then cached locally and can then be read asynchronously by other programming models using PMIx's Event Notification system (see next section for more details).
+When initializing PMIx, runtime libraries implementing a parallel programming model can register themselves, including their name, the library version, the version of the API they implement, and the threading model.  This information is then cached locally and can then be read asynchronously by other runtime systems using PMIx's Event Notification system (see next section for more details).
 
-This initialization mechanism also allows libraries to share knowledge of each other's resources and intended resource utilization. For example, if OpenMP knows which hardware threads that MPI is using it could potentially avoid processor and cache contention.
+This initialization mechanism also allows runtime libraries to share knowledge of each other's resources and intended resource utilization. For example, if an OpenMP implementation knows which hardware threads that an MPI library is using it could potentially avoid core and cache contention.
 
 \littleheader{Code Example}
 
@@ -362,13 +363,13 @@ This initialization mechanism also allows libraries to share knowledge of each o
 
 The PMIx Event Notification system provides a mechanism by which the resource manager can communicate system events to applications, thus providing applications with an opportunity to generate an appropriate response. Hybrid applications can leverage these events for cross-library coordination.
 
-Programming models can access the information provided by other programming models during their initialization using the event notification system.  In this case, programming models should register a callback for the \refconst{PMIX_MODEL_DECLARED} event.
+Runtime libraries can access the information provided by other runtime libraries during their initialization using the event notification system.  In this case, runtime libraries should register a callback for the \refconst{PMIX_MODEL_DECLARED} event.
 
-Programming models can also use the PMIx event notification system to communicate dynamic information, such as entering a new application phase (\pasteAttributeItem{PMIX_MODEL_PHASE_NAME}) or a change in resources used (\refconst{PMIX_MODEL_RESOURCES}).  This dynamic information can be broadcast to other programming models using the \refapi{PMIx_Notify_event} function.  Other programming models can register callback functions to run when these events occur (i.e., callback functions) using \refapi{PMIx_Register_event_handler}.
+Applications, runtime libraries, and resource managers can also use the PMIx event notification system to communicate dynamic information, such as entering a new application phase (\pasteAttributeItem{PMIX_MODEL_PHASE_NAME}) or a change in resources used (\refconst{PMIX_MODEL_RESOURCES}).  This dynamic information can be broadcast using the \refapi{PMIx_Notify_event} function.  Runtime libraries can register callback functions to run when these events occur using \refapi{PMIx_Register_event_handler}.
 
 \littleheader{Code Example}
 
-Registering a callback to run when another programming model initializes:
+Registering a callback to run when another runtime library initializes:
 \pmixCodeImportC[]{sources/_autogen_/hybrid-prog-model.c_declare_model_cb}
 
 
@@ -397,7 +398,7 @@ Notifying an event:
 
 \subsubsection{Coordinating at Runtime with Multiple Event Handlers}
 
-Coordinating with a threading library such as OpenMP creates the need for separate event handlers for threads of the same process.  For example in an MPI+OpenMP hybrid application, the MPI thread and the main OpenMP thread may both want to be notified anytime an OpenMP worker thread enters a parallel region.  This requires support for multiple threads to potentially register different event handlers against the same status code.
+Coordinating with a threading library such as an OpenMP runtime library creates the need for separate event handlers for threads of the same process.  For example in an MPI+OpenMP hybrid application, the MPI main thread and the OpenMP primary thread may both want to be notified anytime an OpenMP thread starts executing in a parallel region.  This requires support for multiple threads to potentially register different event handlers against the same status code.
 
 Multiple event handlers registered against the same event are processed in a chain-like manner based on the order in which they were registered, as modified by directive. Registrations against specific event codes are processed first, followed by registrations against multiple event codes and then any default registrations. At each point in the chain, an event handler is called by the PMIx progress thread and given a function to call when that handler has completed its operation. The handler callback notifies PMIx that the handler is done, returning a status code to indicate the result of its work. The results are appended to the array of prior results, with the returned values combined into an array within a single pmix_info_t as follows:
 \begin{itemize}
@@ -415,13 +416,13 @@ The current PMIx standard does not actually specify a default ordering for event
 
 \littleheader{Code Example}
 
-From the OpenMP master thread:
+From the OpenMP primary thread:
 
 \pmixCodeImportC[]{sources/_autogen_/hybrid-prog-model.c_omp_thread}
 
-From the MPI thread:
+From the MPI process:
 
-\pmixCodeImportC[]{sources/_autogen_/hybrid-prog-model.c_mpi_thread}
+\pmixCodeImportC[]{sources/_autogen_/hybrid-prog-model.c_mpi_process}
 
 \littleheader{Related Interfaces, Attributes, and Constants}
 
