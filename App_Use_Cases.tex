@@ -94,15 +94,17 @@ There are other keys that are helpful to have before a synchronization point. Th
 A \textit{tool} is a process designed to monitor, record, analyze, or control the execution of another process.  Typically used for the purposes of profiling and debugging. A \textit{first-party tool} runs within the address space of the application process while a \textit{third-party tool} run within its own process.  A \textit{debugger} is a third-party tool that inspects and controls an application process's execution using system-level debug APIs (e.g., \code{ptrace}).
 
 \subsubsection{Parallel Launching Methods}
-A \textit{starter} program is a program responsible for launching a parallel runtime, such as \ac{MPI}.  \ac{PMIx} supports two primary methods for launching parallel applications under tools and debuggers: indirect and direct. In the indirect launching method, the tool is attached to the starter.  In the direct launching method, the tool takes the place of the starter.  
+
+A \textit{starter} program is a program responsible for launching a parallel runtime, such as \ac{MPI}.  \ac{PMIx} supports two primary methods for launching parallel applications under tools and debuggers: indirect and direct. In the indirect launching method (Section~\ref{chap:api_tools:indirect}, the tool is attached to the starter.  In the direct launching method (Section~\ref{chap:api_tools:direct}, the tool takes the place of the starter.
 \ac{PMIx} also supports attaching to already running programs via the \textit{Process Acquisition} interfaces (Section~\ref{subsubsec:process-acq}).
 
 \subsubsection{Process Synchronization}
-Process Synchronization is a technique tools use to start the processes of a parallel application such that the tools can still attach to the process early in it's lifetime.  Said another away, the tool must be able to start the application processes without them ``running away'' from the tool.  In the case of \ac{MPI} (Version 3.1 or the MPI World Process in future versions), this means stopping the applications processes before they return from \code{MPI_Init} or \code{MPI_Init_thread}.
+
+Process Synchronization is a technique tools use to start the processes of a parallel application such that the tools can still attach to the process early in its lifetime.  Said another away, the tool must be able to start the application processes without them ``running away'' from the tool.  In the case of \ac{MPI} (Version 3.1~\cite{mpi-3.1} or the MPI World Process in future versions), this means stopping the applications processes before they return from \code{MPI_Init} or \code{MPI_Init_thread}.
 
 \subsubsection{Process Acquisition}\label{subsubsec:process-acq}
 
-Process Acquisition is a technique tools use to locate all of the processes, local and remote, of a given parallel application.  This typically boils down to collecting for every process in the parallel application: the hostname or IP of the machine running the process, the executable name, and the process ID.
+Process Acquisition is a technique tools use to locate all of the processes, local and remote, of a given parallel application.  This typically boils down to collecting the following information for every process in the parallel application: the hostname or IP of the machine running the process, the executable name, and the process ID.
 
 \subsection{Use Case Details}
 \subsubsection{Direct-Launch Debugger Tool}
@@ -116,7 +118,7 @@ Assuming it is supported, co-launch of debugger daemons in this use-case is supp
   \begin{center}
     \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{figs/direct-launch}
   \end{center}
-  \caption{Direct Launch}
+  \caption{Interaction diagram showing an example of the Direct Launch mechanism}
   \label{fig:direct_launch}
 \end{figure*}
 \endgroup
@@ -169,7 +171,7 @@ Assuming it is supported, co-launch of debugger daemons in this use-case is supp
 
 \subsubsection{Indirect-Launch Debugger Tool}
 
-Executing a program under a tool using an intermediate launcher such as \code{mpiexec} can also be made possible. This requires some degree of coordination between the tool and the launcher. Ultimately, it is the launcher that is going to launch the application, and the tool must somehow inform it (and the application) that this is being done in a debug session so that the application knows to ``block'' until the tool attaches to it.
+Executing a program under a tool using an intermediate launcher such as \code{mpiexec} can also be made possible. This requires some degree of coordination between the tool and the launcher. Ultimately, it is the launcher that is going to launch the application, and the tool must somehow inform the launcher (and the application) that this is being done in a debug session so that the application knows to ``block'' until the tool attaches to it.
 
 In this operational mode, the user invokes a tool (typically on a non-compute, or ``head'', node) that in turn uses \code{mpiexec} to launch their application – a typical command line might look like the following: \code{dbgr -dbgoption mpiexec -n 32 ./myapp}.
 
@@ -178,7 +180,7 @@ In this operational mode, the user invokes a tool (typically on a non-compute, o
   \begin{center}
     \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{figs/indirect-launch}
   \end{center}
-  \caption{Indirect Launch}
+  \caption{Interaction diagram showing an example of the Indirect Launch mechanism}
   \label{fig:indirect_launch}
 \end{figure*}
 \endgroup
@@ -246,7 +248,7 @@ An example of this use-case may look like the following: \code{mpiexec -n~32~./m
   \begin{center}
     \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{figs/process-acquisition}
   \end{center}
-  \caption{Attaching to a Running Job}
+  \caption{Interaction diagram showing an example of the attaching to a running job}
   \label{fig:proc_acq}
 \end{figure*}
 \endgroup
@@ -324,7 +326,7 @@ Resource managers and launchers must scan for relevant directives, modifying env
 
 \subsection{Use Case Summary}
 
-Hybrid applications (i.e., applications that utilize more than one programming model or system, such as an MPI application that also uses OpenMP or UPS) are growing in popularity, especially as processors with increasingly large numbers of cores and/or hardware threads proliferate. Unfortunately, the various corresponding runtime systems currently operate under the assumption that they alone control execution. This leads to conflicts in hybrid applications. Deadlock of parallel applications can occur when one runtime system prevents the other from making progress due to lack of coordination between them~\cite{2016:Hamidouche}.  Sub-optimal performance can also occur due to uncoordinated division of hardware resources between the runtime systems implementing the different programming models or systems~\cite{2018:Vallee,ompix-moc}. This use-case offers potential solutions to this
+Hybrid applications (i.e., applications that utilize more than one programming model or system, such as an MPI application that also uses OpenMP or UPS) are growing in popularity, especially as processors with increasingly large numbers of cores and/or hardware threads proliferate. Unfortunately, the various corresponding runtime systems currently operate under the assumption that they alone control execution. This leads to conflicts in hybrid applications. Deadlock of parallel applications can occur when one runtime system prevents the other from making progress due to lack of coordination between them~\cite{2016:Hamidouche}.  Sub-optimal performance can also occur due to uncoordinated division of hardware resources between the runtime systems implementing the different programming models or systems~\cite{ompix-moc,2018:Vallee}. This use-case offers potential solutions to this
 problem by providing a pathway for parallel runtime systems to coordinate their actions.
 
 \subsection{Use Case Details}
@@ -400,7 +402,7 @@ Notifying an event:
 
 Coordinating with a threading library such as an OpenMP runtime library creates the need for separate event handlers for threads of the same process.  For example in an MPI+OpenMP hybrid application, the MPI main thread and the OpenMP primary thread may both want to be notified anytime an OpenMP thread starts executing in a parallel region.  This requires support for multiple threads to potentially register different event handlers against the same status code.
 
-Multiple event handlers registered against the same event are processed in a chain-like manner based on the order in which they were registered, as modified by any directives. Registrations against specific event codes are processed first, followed by registrations against multiple event codes and then any default registrations. At each point in the chain, an event handler is called by the PMIx progress thread and given a function to call when that handler has completed its operation. The handler callback notifies PMIx that the handler is done, returning a status code to indicate the result of its work. The results are appended to the array of prior results, with the returned values combined into an array within a single pmix_info_t as follows:
+Multiple event handlers registered against the same event are processed in a chain-like manner based on the order in which they were registered, as modified by any directives. Registrations against specific event codes are processed first, followed by registrations against multiple event codes and then any default registrations. At each point in the chain, an event handler is called by the PMIx progress thread and given a function to call when that handler has completed its operation. The handler callback notifies PMIx that the handler is done, returning a status code to indicate the result of its work. The results are appended to the array of prior results, with the returned values combined into an array within a single \refstruct{pmix_info_t} as follows:
 \begin{itemize}
 \item \texttt{array[0]}: the event handler name provided at registration (may be an empty field if a string name was not given) will be in the key, with the \refstruct{pmix_status_t} value returned by the handler
 \item \texttt{array[*]}: the array of results returned by the handler, if any.
@@ -410,8 +412,8 @@ The current PMIx standard does not actually specify a default ordering for event
 
 \begin{itemize}
 \item single status event handlers - handlers that were registered against a single specific status.
-\item multi status event handlers - those registered against more than one specific status
-\item default event handlers - those registered against no specific status
+\item multi status event handlers - those registered against more than one specific status.
+\item default event handlers - those registered against no specific status.
 \end{itemize}
 
 \littleheader{Code Example}
