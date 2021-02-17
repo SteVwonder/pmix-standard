@@ -165,9 +165,9 @@ Assuming it is supported, co-launch of debugger daemons in this use-case is supp
 
 \subsubsection{Indirect-Launch Debugger Tool}
 
-Executing a program under a tool using an intermediate launcher such as \texttt{mpiexec} can also be made possible. This requires some degree of coordination between the tool and the launcher. Ultimately, it is the launcher that is going to launch the application, and the tool must somehow inform it (and the application) that this is being done in a debug session so that the application knows to ``block'' until the tool attaches to it.
+Executing a program under a tool using an intermediate launcher such as \code{mpiexec} can also be made possible. This requires some degree of coordination between the tool and the launcher. Ultimately, it is the launcher that is going to launch the application, and the tool must somehow inform it (and the application) that this is being done in a debug session so that the application knows to ``block'' until the tool attaches to it.
 
-In this operational mode, the user invokes a tool (typically on a non-compute, or ``head'', node) that in turn uses mpiexec to launch their application – a typical command line might look like the following: \code{dbgr -dbgoption mpiexec -n 32 ./myapp}.
+In this operational mode, the user invokes a tool (typically on a non-compute, or ``head'', node) that in turn uses \code{mpiexec} to launch their application – a typical command line might look like the following: \code{dbgr -dbgoption mpiexec -n 32 ./myapp}.
 
 \begingroup
 \begin{figure*}
@@ -288,7 +288,7 @@ Tools can benefit from a mechanism by which they may interact with a local PMIx 
 
 \subsubsection{Environmental Parameter Directives for Applications and Launchers}
 
-It is sometimes desirable or required that standard environmental variables (e.g., \code{PATH}, \code{LD_LIBRARY_PATH}, \code{LD_PRELOAD}) be modified prior to executing an application binary or a starter such as mpiexec - this is particularly true when tools/debuggers are used to start the application.
+It is sometimes desirable or required that standard environmental variables (e.g., \code{PATH}, \code{LD_LIBRARY_PATH}, \code{LD_PRELOAD}) be modified prior to executing an application binary or a starter such as \code{mpiexec} - this is particularly true when tools/debuggers are used to start the application.
 
 \littleheader{Related Interfaces}
 
