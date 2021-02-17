@@ -4,9 +4,9 @@
 \chapter{Use-Cases}
 \label{app:use-cases}
 
-The \ac{PMIx} standard provides many generic interfaces that can be composed into higher-level use cases in a variety of ways.  While the specific interfaces and attributes are standardized, the use cases themselves are not (and should not) be standardized.  Common use cases are included here as examples of how PMIx's generic interfaces \textit{might} be composed together for a higher-level purpose. The use cases are intended for both \ac{PMIx} interface users and library implementors.  Whereby a better understanding of the general usage model within the community can help users picking up PMIx for the first and help implementors optimize their implementation for the common cases.
+The \ac{PMIx} standard provides many generic interfaces that can be composed into higher-level use cases in a variety of ways.  While the specific interfaces and attributes are standardized, the use cases themselves are not (and should not) be standardized. Common use cases are included here as examples of how PMIx's generic interfaces \textit{might} be composed together for a higher-level purpose. The use cases are intended for both \ac{PMIx} interface users and library implementors. Whereby a better understanding of the general usage model within the community can help users picking up PMIx for the first and help implementors optimize their implementation for the common cases.
 
-Each use case is structured to provide background information about the high-level use case as well as specific details about how the PMIx interfaces are used within the use case.  Some use cases even provide code snippets.  These code snippets are apart of larger code examples located within the standard's source code repository, and each complete code example is fully compilable and runnable. The related interfaces and attributes collected at the bottom of each use case are mainly for conveinence and link to the full standardized definitions.
+Each use case is structured to provide background information about the high-level use case as well as specific details about how the PMIx interfaces are used within the use case. Some use cases even provide code snippets. These code snippets are apart of larger code examples located within the standard's source code repository, and each complete code example is fully compilable and runnable. The related interfaces and attributes collected at the bottom of each use case are mainly for conveinence and link to the full standardized definitions.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -15,7 +15,7 @@ Each use case is structured to provide background information about the high-lev
 
 \subsection{Use Case Summary}
 
-Multi-process communication libraries, such as MPI, need to establish communication channels between a set of those processes. In this scenario, each process needs to share connectivity information (a.k.a. Business Cards) with all other processes before communication channels can be established. This connectivity information may take the form of one or more unique strings that allow a different process to establish a communication channel with the originator. The runtime environment must provide a mechanism for the efficient exchange of this connectivity information. Additional information about the current state of the job (e.g., number of processes globally and locally) and of how the process was started (e.g., process binding) are also helpful.
+Multi-process communication libraries, such as MPI, need to establish communication channels between a set of those processes. In this scenario, each process needs to share connectivity information (a.k.a. Business Cards) with all other processes before communication channels can be established. This connectivity information may take the form of one or more unique strings that allow a different process to establish a communication channel with the originator. The runtime environment must provide a mechanism for the efficient exchange of this connectivity information. Additional information about the current state of the job (e.g., number of processes globally and locally) and of how the process was started (e.g., process binding) is also helpful.
 
 Note: The Instant-On wire-up mechanism is a separate, related use case.
 
@@ -31,11 +31,9 @@ After calling \refapi{PMIx_Commit} a process can activate the Business Card Exch
 
 The \refapi{PMIx_Fence} operation has a "Synchronize Only" mode that works as a barrier operation. This is helpful if the communication library requires a synchronization before leaving initialization or starting finalization, for example.
 
-The \refapi{PMIx_Fence} operation has a "Sparse" mode in addition to a "Full" mode for the data exchange. The "Full" mode will fully exchange all Business Card information to all other processes. This is helpful for tightly communicating applications. The "Sparse" mode will dynamically pull the connectivity information on-demand from inside of \refapi{PMIx_Get} (if it is not already available locally). This is helpful for sparsely communicating applications. Since which mode is best for an application cannot be inferred by the PMIx library the caller must specify which mode works best for their application.
+The \refapi{PMIx_Fence} operation has a "Sparse" mode in addition to a "Full" mode for the data exchange. The "Full" mode will fully exchange all Business Card information with all other processes. This is helpful for tightly communicating applications. The "Sparse" mode will dynamically pull the connectivity information on-demand from inside of \refapi{PMIx_Get} (if it is not already available locally). This is helpful for sparsely communicating applications. Since which mode is best for an application cannot be inferred by the PMIx library the caller must specify which mode works best for their application. The \refapi{PMIx_Fence} operation has an option for the end user to specify which mode they desire for this operation.
 
-The \refapi{PMIx_Fence} operation has an option for the end user to specify which mode they desire for this operation.
-
-Additional information about the current state of the job (e.g., number of processes globally and locally) and of how the process was started (e.g., process binding) are also helpful. This "job level" information is available immediately after \refapi{PMIx_Init} without the need for any explicit synchronization.
+Additional information about the current state of the job (e.g., number of processes globally and locally) and of how the process was started (e.g., process binding) is also helpful. This "job level" information is available immediately after \refapi{PMIx_Init} without the need for any explicit synchronization.
 
 The number of processes globally in the namespace and this process's rank within that namespace is important to know before establishing the Business Card information to best allocate resources.
 
@@ -62,7 +60,7 @@ Note that some of the job level information may change over the course of the jo
 {\large \refapi{PMIx_Init}}
 \pasteSignature{PMIx_Init}
 
-\littleheader{Related Keys}
+\littleheader{Related Attributes}
 
 The following job level information is useful to have before establishing Business Card information:
 
@@ -91,10 +89,10 @@ There are other keys that are helpful to have before a synchronization point. Th
 
 \subsubsection{Tools vs Debuggers}
 
-A \textit{tool} is a process designed to monitor, record, analyze, or control the execution of another process.  Typically used for the purposes of profiling and debugging. A \textit{first-party tool} runs within the address space of the application process while a \textit{third-party tool} run within its own process.  A \textit{debugger} is a third-party tool that inspects and controls an application process's execution using system-level debug APIs (e.g., \code{ptrace}).
+A \textit{tool} is a process designed to monitor, record, analyze, or control the execution of another process. Typically used for the purposes of profiling and debugging. A \textit{first-party tool} runs within the address space of the application process while a \textit{third-party tool} run within its own process. A \textit{debugger} is a third-party tool that inspects and controls an application process's execution using system-level debug APIs (e.g., \code{ptrace}).
 
 \subsubsection{Parallel Launching Methods}
-A \textit{starter} program is a program responsible for launching a parallel runtime, such as \ac{MPI}.  \ac{PMIx} supports two primary methods for launching parallel applications under tools and debuggers: indirect and direct. In the indirect launching method, the tool is attached to the starter.  In the direct launching method, the tool takes the place of the starter.  
+A \textit{starter} program is a program responsible for launching a parallel runtime, such as \ac{MPI}. \ac{PMIx} supports two primary methods for launching parallel applications under tools and debuggers: indirect and direct. In the indirect launching method, the tool is attached to the starter. In the direct launching method, the tool takes the place of the starter.  
 \ac{PMIx} also supports attaching to already running programs via the \textit{Process Acquisition} interfaces (Section~\ref{subsubsec:process-acq}).
 
 \subsubsection{Process Synchronization}
@@ -102,7 +100,7 @@ Process Synchronization is a technique tools use to start the processes of a par
 
 \subsubsection{Process Acquisition}\label{subsubsec:process-acq}
 
-Process Acquisition is a technique tools use to locate all of the processes, local and remote, of a given parallel application.  This typically boils down to collecting for every process in the parallel application: the hostname or IP of the machine running the process, the executable name, and the process ID.
+Process Acquisition is a technique tools use to locate all of the processes, local and remote, of a given parallel application. This typically boils down to collecting for every process in the parallel application: the hostname or IP of the machine running the process, the executable name, and the process ID.
 
 \subsection{Use Case Details}
 \subsubsection{Direct-Launch Debugger Tool}
@@ -165,9 +163,9 @@ Assuming it is supported, co-launch of debugger daemons in this use-case is supp
 
 \subsubsection{Indirect-Launch Debugger Tool}
 
-Executing a program under a tool using an intermediate launcher such as \code{mpiexec} can also be made possible. This requires some degree of coordination between the tool and the launcher. Ultimately, it is the launcher that is going to launch the application, and the tool must somehow inform it (and the application) that this is being done in a debug session so that the application knows to ``block'' until the tool attaches to it.
+Executing a program under a tool using an intermediate launcher such as \texttt{mpiexec} can also be made possible. This requires some degree of coordination between the tool and the launcher. Ultimately, it is the launcher that is going to launch the application, and the tool must somehow inform it (and the application) that this is being done in a debug session so that the application knows to ``block'' until the tool attaches to it.
 
-In this operational mode, the user invokes a tool (typically on a non-compute, or ``head'', node) that in turn uses \code{mpiexec} to launch their application – a typical command line might look like the following: \code{dbgr -dbgoption mpiexec -n 32 ./myapp}.
+In this operational mode, the user invokes a tool (typically on a non-compute, or ``head'', node) that in turn uses mpiexec to launch their application – a typical command line might look like the following: \code{dbgr -dbgoption mpiexec -n 32 ./myapp}.
 
 \begingroup
 \begin{figure*}
@@ -288,7 +286,7 @@ Tools can benefit from a mechanism by which they may interact with a local PMIx 
 
 \subsubsection{Environmental Parameter Directives for Applications and Launchers}
 
-It is sometimes desirable or required that standard environmental variables (e.g., \code{PATH}, \code{LD_LIBRARY_PATH}, \code{LD_PRELOAD}) be modified prior to executing an application binary or a starter such as \code{mpiexec} - this is particularly true when tools/debuggers are used to start the application.
+It is sometimes desirable or required that standard environmental variables (e.g., \code{PATH}, \code{LD_LIBRARY_PATH}, \code{LD_PRELOAD}) be modified prior to executing an application binary or a starter such as mpiexec - this is particularly true when tools/debuggers are used to start the application.
 
 \littleheader{Related Interfaces}
 
@@ -314,18 +312,17 @@ Resource managers and launchers must scan for relevant directives, modifying env
 
 \subsection{Use Case Summary}
 
-Hybrid applications (i.e., applications that utilize more than one programming model or system, such as an MPI application that also uses OpenMP or UPS) are growing in popularity, especially as processors with increasingly large numbers of cores and/or hardware threads proliferate. Unfortunately, the various corresponding runtime systems currently operate under the assumption that they alone control execution. This leads to conflicts in hybrid applications. Deadlock of parallel applications can occur when one runtime system prevents the other from making progress due to lack of coordination between them~\cite{2016:Hamidouche}.  Sub-optimal performance can also occur due to uncoordinated division of hardware resources between the runtime systems implementing the different programming models or systems~\cite{2018:Vallee,ompix-moc}. This use-case offers potential solutions to this
-problem by providing a pathway for parallel runtime systems to coordinate their actions.
+Hybrid applications (i.e., applications that utilize more than one programming model or system, such as an application using MPI that also uses OpenMP or UPS) are growing in popularity, especially as processors with increasingly large numbers of cores and/or hardware threads proliferate. Unfortunately, the various corresponding runtime systems currently operate under the assumption that they alone control execution. This leads to conflicts in hybrid applications. Deadlock of parallel applications can occur when one runtime system prevents the other from making progress due to lack of coordination between them~\cite{2016:Hamidouche}. Sub-optimal performance can also occur due to uncoordinated division of hardware resources between the runtime systems implementing the different programming models or systems~\cite{2018:Vallee,ompix-moc}. This use-case offers potential solutions to this problem by providing a pathway for parallel runtime systems to coordinate their actions.
 
 \subsection{Use Case Details}
 
 \subsubsection{Identifying Active Programming Models}
 
-The current state-of-the-practice for concurrently used runtime systems in a single application to detect one another is via set environment variables.  For example, some OpenMP implementations look for environment variables to indicate that an MPI library is active.  Unfortunately, this technique is not completely reliable as environment variables change over time and with new software versions, and this detection is implementation specific.  Also, the fact that an environment variable is present doesn't guarantee that a particular runtime system is in active use since Resource Managers routinely set environment variables "just in case" the application needs them. PMIx provides a reliable mechanism by which each library can determine that another runtime library is in operation.
+The current state-of-the-practice for concurrently used runtime systems in a single application to detect one another is via set environment variables.  For example, some OpenMP implementations look for environment variables to indicate that an MPI library is active. Unfortunately, this technique is not completely reliable as environment variables change over time and with new software versions, and this detection is implementation specific. Also, the fact that an environment variable is present doesn't guarantee that a particular runtime system is in active use since Resource Managers routinely set environment variables "just in case" the application needs them. PMIx provides a reliable mechanism by which each library can determine that another runtime library is in operation.
 
-When initializing PMIx, runtime libraries implementing a parallel programming model can register themselves, including their name, the library version, the version of the API they implement, and the threading model.  This information is then cached locally and can then be read asynchronously by other runtime systems using PMIx's Event Notification system (see next section for more details).
+When initializing PMIx, runtime libraries implementing a parallel programming model can register themselves, including their name, the library version, the version of the API they implement, and the threading model. This information is then cached locally and can then be read asynchronously by other runtime systems using PMIx's Event Notification system.
 
-This initialization mechanism also allows runtime libraries to share knowledge of each other's resources and intended resource utilization. For example, if an OpenMP implementation knows which hardware threads that an MPI library is using it could potentially avoid core and cache contention.
+This initialization mechanism also allows runtime libraries to share knowledge of each other's resources and intended resource utilization. For example, if an OpenMP implementation knows which hardware threads an MPI library is using it could potentially avoid core and cache contention.
 
 \littleheader{Code Example}
 
@@ -355,40 +352,36 @@ The PMIx Event Notification system provides a mechanism by which the resource ma
 
 Runtime libraries can access the information provided by other runtime libraries during their initialization using the event notification system.  In this case, runtime libraries should register a callback for the \refconst{PMIX_MODEL_DECLARED} event.
 
-Applications, runtime libraries, and resource managers can also use the PMIx event notification system to communicate dynamic information, such as entering a new application phase (\refattr{PMIX_MODEL_PHASE_NAME}) or a change in resources used (\refconst{PMIX_MODEL_RESOURCES}).  This dynamic information can be broadcast using the \refapi{PMIx_Notify_event} function.  Runtime libraries can register callback functions to run when these events occur using \refapi{PMIx_Register_event_handler}.
+Applications, runtime libraries, and resource managers can also use the PMIx event notification system to communicate dynamic information, such as entering a new application phase (\refattr{PMIX_MODEL_PHASE_NAME}) or a change in resources used (\refconst{PMIX_MODEL_RESOURCES}). This dynamic information can be broadcast using the \refapi{PMIx_Notify_event} function. Runtime libraries can register callback functions to run when these events occur using \refapi{PMIx_Register_event_handler}.
 
 \littleheader{Code Example}
 
 Registering a callback to run when another runtime library initializes:
 \pmixCodeImportC[]{sources/_autogen_/hybrid-prog-model.c_declare_model_cb}
 
-
 Notifying an event:
 \pmixCodeImportC[]{sources/_autogen_/hybrid-prog-model.c_notify_event}
 
-\littleheader{Related Interfaces and Constants}
+\littleheader{Related Interfaces}
 
 {\large \refapi{PMIx_Notify_event}}
 \pasteSignature{PMIx_Notify_event}
+{\large \refapi{PMIx_Register_event_handler}}
+\pasteSignature{PMIx_Register_event_handler}
+{\large \refapi{pmix_event_notification_cbfunc_fn_t}}
+\pasteSignature{pmix_event_notification_cbfunc_fn_t}
+
+\littleheader{Related Constants}
 
 \refconst{PMIX_MODEL_DECLARED} \\
 \refconst{PMIX_MODEL_RESOURCES} \\
 \refconst{PMIX_OPENMP_PARALLEL_ENTERED} \\
 \refconst{PMIX_OPENMP_PARALLEL_EXITED} \\
-
-{\large \refapi{PMIx_Register_event_handler}}
-\pasteSignature{PMIx_Register_event_handler}
-
-{\large \refapi{pmix_event_notification_cbfunc_fn_t}}
-\pasteSignature{pmix_event_notification_cbfunc_fn_t}
-
 \refconst{PMIX_EVENT_ACTION_COMPLETE}
-
-
 
 \subsubsection{Coordinating at Runtime with Multiple Event Handlers}
 
-Coordinating with a threading library such as an OpenMP runtime library creates the need for separate event handlers for threads of the same process.  For example in an MPI+OpenMP hybrid application, the MPI main thread and the OpenMP primary thread may both want to be notified anytime an OpenMP thread starts executing in a parallel region.  This requires support for multiple threads to potentially register different event handlers against the same status code.
+Coordinating with a threading library such as OpenMP creates the need for separate event handlers for threads of the same process. For example in an MPI+OpenMP hybrid application, the MPI main thread and the OpenMP primary thread may both want to be notified anytime an OpenMP thread starts executing in a parallel region. This requires support for multiple threads to potentially register different event handlers against the same status code.
 
 Multiple event handlers registered against the same event are processed in a chain-like manner based on the order in which they were registered, as modified by any directives. Registrations against specific event codes are processed first, followed by registrations against multiple event codes and then any default registrations. At each point in the chain, an event handler is called by the PMIx progress thread and given a function to call when that handler has completed its operation. The handler callback notifies PMIx that the handler is done, returning a status code to indicate the result of its work. The results are appended to the array of prior results, with the returned values combined into an array within a single pmix_info_t as follows:
 \begin{itemize}
@@ -414,10 +407,14 @@ From the MPI process:
 
 \pmixCodeImportC[]{sources/_autogen_/hybrid-prog-model.c_mpi_process}
 
-\littleheader{Related Interfaces, Attributes, and Constants}
+\littleheader{Related Interfaces}
 
 {\large \refapi{PMIx_Register_event_handler}}
 \pasteSignature{PMIx_Register_event_handler}
+{\large \refapi{pmix_event_notification_cbfunc_fn_t}}
+\pasteSignature{pmix_event_notification_cbfunc_fn_t}
+
+\littleheader{Attributes}
 
 \pasteAttributeItem{PMIX_EVENT_HDLR_NAME}
 \pasteAttributeItem{PMIX_EVENT_HDLR_FIRST}
@@ -428,8 +425,7 @@ From the MPI process:
 \pasteAttributeItem{PMIX_EVENT_HDLR_AFTER}
 \pasteAttributeItem{PMIX_EVENT_HDLR_APPEND}
 
-{\large \refapi{pmix_event_notification_cbfunc_fn_t}}
-\pasteSignature{pmix_event_notification_cbfunc_fn_t}
+\littleheader{Constants}
 
 \refconst{PMIX_EVENT_NO_ACTION_TAKEN} \\
 \refconst{PMIX_EVENT_PARTIAL_ACTION_TAKEN} \\
